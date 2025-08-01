@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect } from "react"
-import { usePathname, useSearchParams } from "next/navigation"
+import { usePathname } from "next/navigation"
 
 declare global {
   interface Window {
@@ -15,15 +15,12 @@ export const FB_PIXEL_ID = "XXXXXXXXXXXXXXX" // Replace with actual Facebook Pix
 
 export function Analytics() {
   const pathname = usePathname()
-  const searchParams = useSearchParams()
 
   useEffect(() => {
-    const url = pathname + searchParams.toString()
-    
     // Google Analytics
     if (window.gtag) {
       window.gtag("config", GA_TRACKING_ID, {
-        page_path: url,
+        page_path: pathname,
       })
     }
     
@@ -31,7 +28,7 @@ export function Analytics() {
     if (window.fbq) {
       window.fbq("track", "PageView")
     }
-  }, [pathname, searchParams])
+  }, [pathname])
 
   return null
 }

@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { Suspense } from "react"
 import { Montserrat, Playfair_Display } from "next/font/google"
 import { Analytics } from "@/components/Analytics"
 import { AnalyticsScript } from "@/components/AnalyticsScript"
@@ -33,7 +34,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${montserrat.variable} ${playfair.variable}`}>
       <body className={montserrat.className}>
-        <Analytics />
+        <Suspense fallback={null}>
+          <Analytics />
+        </Suspense>
         <AnalyticsScript />
         {children}
       </body>
