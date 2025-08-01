@@ -31,6 +31,8 @@ type FormData = z.infer<typeof formSchema>
 export default function Home() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const [isHeroSubmitting, setIsHeroSubmitting] = useState(false)
+  const [isHeroSubmitted, setIsHeroSubmitted] = useState(false)
 
   const {
     register,
@@ -38,6 +40,14 @@ export default function Home() {
     formState: { errors },
     setValue,
     watch,
+  } = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+  })
+
+  const {
+    register: registerHero,
+    handleSubmit: handleSubmitHero,
+    formState: { errors: errorsHero },
   } = useForm<FormData>({
     resolver: zodResolver(formSchema),
   })
@@ -59,6 +69,21 @@ export default function Home() {
 
   const handleFormInteraction = () => {
     trackFormStart()
+  }
+
+  const onHeroSubmit = async (data: FormData) => {
+    setIsHeroSubmitting(true)
+    try {
+      // TODO: Send to CRM
+      console.log("Hero form submitted:", data)
+      trackFormSubmit()
+      await new Promise(resolve => setTimeout(resolve, 2000))
+      setIsHeroSubmitting(false)
+      setIsHeroSubmitted(true)
+    } catch (error) {
+      trackFormError("hero_submission_failed")
+      setIsHeroSubmitting(false)
+    }
   }
 
   const trustBadges = [
@@ -106,11 +131,76 @@ export default function Home() {
                 ))}
               </div>
 
+              {/* Inline Lead Form for Hero Section */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="bg-white/90 backdrop-blur p-6 rounded-xl shadow-lg border border-gray-100 mb-8"
+              >
+                <h3 className="text-lg font-semibold mb-4">Get Your Free Valuation</h3>
+                {!isHeroSubmitted ? (
+                  <form onSubmit={handleSubmitHero(onHeroSubmit)} className="flex flex-col sm:flex-row gap-3">
+                    <div className="flex-1">
+                      <Input
+                        {...registerHero("firstName")}
+                        placeholder="First Name *"
+                        className={`w-full ${errorsHero.firstName ? "border-red-500" : ""}`}
+                        onFocus={handleFormInteraction}
+                      />
+                      {errorsHero.firstName && (
+                        <p className="text-red-500 text-xs mt-1">{errorsHero.firstName.message}</p>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <Input
+                        {...registerHero("phone")}
+                        placeholder="Phone Number *"
+                        className={`w-full ${errorsHero.phone ? "border-red-500" : ""}`}
+                      />
+                      {errorsHero.phone && (
+                        <p className="text-red-500 text-xs mt-1">{errorsHero.phone.message}</p>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <Input
+                        type="email"
+                        {...registerHero("email")}
+                        placeholder="Email Address *"
+                        className={`w-full ${errorsHero.email ? "border-red-500" : ""}`}
+                      />
+                      {errorsHero.email && (
+                        <p className="text-red-500 text-xs mt-1">{errorsHero.email.message}</p>
+                      )}
+                    </div>
+                    <Button
+                      type="submit"
+                      className="bg-yellow-600 hover:bg-yellow-700 font-semibold whitespace-nowrap"
+                      disabled={isHeroSubmitting}
+                    >
+                      {isHeroSubmitting ? (
+                        <motion.div
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                          className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+                        />
+                      ) : (
+                        "Get Cash Offer"
+                      )}
+                    </Button>
+                  </form>
+                ) : (
+                  <div className="text-center">
+                    <p className="text-green-600 font-semibold">Thank you! We'll contact you within 24 hours.</p>
+                  </div>
+                )}
+              </motion.div>
+
               {/* Hero Image for Mobile */}
               <div className="lg:hidden mb-8">
                 <img 
-                  src="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?q=80&w=2787"
-                  alt="Luxury diamonds and gold jewelry"
+                  src="https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?q=80&w=2086"
+                  alt="10 carat luxury diamond ring"
                   className="rounded-lg shadow-xl w-full h-[300px] object-cover"
                 />
               </div>
@@ -249,10 +339,14 @@ export default function Home() {
           {/* Desktop Hero Image */}
           <div className="hidden lg:block absolute right-0 top-1/2 -translate-y-1/2 w-1/2 h-[600px]">
             <img 
-              src="https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?q=80&w=2787"
-              alt="Luxury diamonds and gold jewelry"
+              src="https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?q=80&w=2086"
+              alt="10 carat luxury diamond ring"
               className="w-full h-full object-cover rounded-l-3xl shadow-2xl"
             />
+            <div className="absolute bottom-8 right-8 bg-black/80 text-white p-4 rounded-lg backdrop-blur">
+              <p className="text-2xl font-bold">10 Carat Diamond</p>
+              <p className="text-lg">Top Dollar Paid</p>
+            </div>
           </div>
         </div>
       </section>
